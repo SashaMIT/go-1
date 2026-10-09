@@ -155,6 +155,12 @@ func (decoder *mapDecoder) Decode(ptr unsafe.Pointer, iter *Iterator) {
 	c := iter.nextToken()
 	if c == 'n' {
 		iter.skipThreeBytes('u', 'l', 'l')
+		// skipThreeBytes reports an error for any n-prefix that is not null.
+		// Leave the existing map in place in that case. Clearing it first
+		// makes a later write panic on a nil map.
+		if iter.Error != nil {
+			return
+		}
 		*(*unsafe.Pointer)(ptr) = nil
 		mapType.UnsafeSet(ptr, mapType.UnsafeNew())
 		return

@@ -68,6 +68,11 @@ func (decoder *sliceDecoder) doDecode(ptr unsafe.Pointer, iter *Iterator) {
 	sliceType := decoder.sliceType
 	if c == 'n' {
 		iter.skipThreeBytes('u', 'l', 'l')
+		// Same as maps: an input such as "none" is not JSON null.
+		// Do not clear a slice the caller already allocated.
+		if iter.Error != nil {
+			return
+		}
 		sliceType.UnsafeSetNil(ptr)
 		return
 	}
